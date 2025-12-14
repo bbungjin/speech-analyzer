@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -28,6 +28,15 @@ const PronunciationTest = () => {
   const [transcript, setTranscript] = useState('');
   const [result, setResult] = useState('');
 
+  const compare = useCallback((speech) => {
+    // Stricter comparison by just trimming whitespace
+    if (targetSentence.trim() === speech.trim()) {
+      setResult("정확합니다! 💯");
+    } else {
+      setResult("조금 아쉬워요. 다시 시도해보세요. 🤔");
+    }
+  }, [targetSentence]);
+
   useEffect(() => {
     if (!recognition) {
       setResult("이 브라우저는 음성 인식을 지원하지 않습니다.");
@@ -49,7 +58,7 @@ const PronunciationTest = () => {
     recognition.onend = () => {
       setIsRecording(false);
     };
-  }, [targetSentence]); // Re-run effect if targetSentence changes
+  }, [compare]);
 
   const handleRecord = () => {
     if (!recognition) return;
@@ -68,15 +77,6 @@ const PronunciationTest = () => {
     setTargetSentence(getRandomSentence());
     setTranscript('');
     setResult('');
-  };
-
-  const compare = (speech) => {
-    // Stricter comparison by just trimming whitespace
-    if (targetSentence.trim() === speech.trim()) {
-      setResult("정확합니다! 💯");
-    } else {
-      setResult("조금 아쉬워요. 다시 시도해보세요. 🤔");
-    }
   };
 
   return (
